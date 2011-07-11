@@ -43,9 +43,9 @@ class Spork::Server
   #   spec_server.run(options.argv, $stderr, $stdout)
   #
   # When implementing a test server, don't override this method: override run_tests instead.
-  def run(argv, stderr, stdout)
+  def run(argv, stderr, stdout, opts={})
     puts "Running tests with args #{argv.inspect}..."
-    result = run_strategy.run(argv, stderr, stdout)
+    result = run_strategy.run(argv, stderr, stdout, opts)
     puts "Done.\n\n"
     result
   end
