@@ -3,9 +3,12 @@ class Spork::RunStrategy::Forking < Spork::RunStrategy
     Kernel.respond_to?(:fork)
   end
 
-  def run(argv, stderr, stdout)
+  def run(argv, stderr, stdout, env_opts={})
     @children ||= []
     @children << (child = ::Spork::Forker.new do
+      env_opts.each do |k,v|
+        ENV[k]=v
+      end
       $stdout, $stderr = stdout, stderr
       load test_framework.helper_file
       Spork.exec_each_run
