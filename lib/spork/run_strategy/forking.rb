@@ -4,21 +4,21 @@ class Spork::RunStrategy::Forking < Spork::RunStrategy
   end
 
   def run(argv, stderr, stdout)
-    abort if running?
-
-    @child = ::Spork::Forker.new do
+    @children ||= []
+    @children << (child = ::Spork::Forker.new do
       $stdout, $stderr = stdout, stderr
       load test_framework.helper_file
       Spork.exec_each_run
       result = test_framework.run_tests(argv, stderr, stdout)
       Spork.exec_after_each_run
       result
-    end
-    @child.result
+    end)
+    @children = @children.reject {|c| c == child}
+    child.result
   end
 
   def abort
-    @child && @child.abort
+    @children && @children.each {|child| child.abort}
   end
 
   def preload
@@ -26,7 +26,7 @@ class Spork::RunStrategy::Forking < Spork::RunStrategy
   end
 
   def running?
-    @child && @child.running?
+    @children && @children.detect {|child| child.running?}
   end
 
   def assert_ready!
